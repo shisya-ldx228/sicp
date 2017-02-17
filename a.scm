@@ -1,0 +1,22 @@
+(define (cubet x)
+    (define (cube t) (* t t t)) 
+    (define (good-enough? guess)
+      (< (/ (abs(- (cube guess) x)) x) 0.0001))
+    (define (improve guess )
+      (/ (+ (/ x (* guess guess)) (* 2 guess)) 3))
+    (define (cubet-iter guess x)
+      (if (good-enough? guess)
+        guess
+        (cubet-iter (improve guess) x )))
+    (cond ((= x 0) 0)
+          ((< x 0) (define x (- x)) (- (cubet-iter 1.0 (- x))))
+          (else (cubet-iter 1.0 x)))
+  )
+
+(print (cubet 27))
+
+(print (cubet 12412124235124124))
+(print (cubet 0.000000000000312))
+(print (cubet -27))
+(print (cubet 1))
+(print (cubet 0))
