@@ -16,24 +16,48 @@
 (define (sum? x)
   (and (pair? x) (eq? (car x) '+)))
 (define (addend s) (cadr s)) 
-(define (augend s) (caddr s)) 
+(define (augend s) (if (null? (cdddr s))
+                     (caddr s)
+                     (append (list '+) (cddr s)))) 
 (define (product? x)
   (and (pair? x) (eq? (car x) '*)))
 (define (multiplier p) (cadr p))
-(define (multiplicand p) (caddr p))
+(define (multiplicand p) (if (null? (cdddr p))
+                           (caddr p)
+                           (append (list '*) (cddr p))))
 (define (exponentiation? ex) (eq? (car ex) '**))
 (define (base ex) (cadr ex))
 (define (exponent ex) (caddr ex))
 (define (make-exponentiation b e) 
   (cond ((=number? e 0) 1)
         ((=number? e 1) b)
+        ((and (number? b) (number? e)) (expt b e))
         (else (list '** b e))))
 
 (define (deriv ex var)
   (cond ((number? ex) 0)
         ((variable? ex) (if (same-variable? ex var) 1 0))
         ((exponentiation? ex)
-         (make-product (exponent ex) (make-expontiation (base ex) (- (exponent ex) 1))))
+         (make-product (make-product (exponent ex) (make-exponentiation (base ex) (- (exponent ex) 1)))
+                       (deriv (base ex) var)))
         ((sum? ex) (make-sum (deriv (addend ex) var) (deriv (augend ex) var)))
         ((product? ex) (make-sum (make-product (deriv (multiplier ex) var) (multiplicand ex))
-                              (make-product (deriv (multiplicand ex) var) (multiplier ex))))))
+                                 (make-product (deriv (multiplicand ex) var) (multiplier ex))))
+        (else (error "unknown expression 
+        type: DERIV" exp))))
+
+;test
+(deriv (list '+ 2 'x) 'x)
+;1
+(deriv '(+ x 3) 'x)
+;1
+(deriv '(* x y) 'x)
+;'y
+(deriv '(* (* x y) (+ x 3)) 'x)
+;'print
+(deriv (make-exponentiation (list '* 4 'x) 2) 'x)
+;'print
+(deriv '(+ x y 3 x) 'x)
+;2
+(deriv '(* x y (+ x 3)) 'x)
+;'print

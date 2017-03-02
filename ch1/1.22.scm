@@ -27,9 +27,3 @@
     1
     (* 10 (exp10 (- n 1))))
   )
-(newline)
-(display (time (find-prime (exp10 13))))
-(newline)
-(display (time (find-prime (exp10 14))))
-(newline)
-(display (time (find-prime (exp10 15))))
